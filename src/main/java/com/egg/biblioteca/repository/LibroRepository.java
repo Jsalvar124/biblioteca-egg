@@ -18,5 +18,5 @@ public interface LibroRepository extends JpaRepository<Libro, Long> {
 
     // Alternativas con JPA
     Libro findByTitulo(String titulo);
-    List<Libro> findByAutor_Nombre(String nombre);
+    List<Libro> findByAutor_Nombre(String nombre); //Coincidencia Exacta
 }

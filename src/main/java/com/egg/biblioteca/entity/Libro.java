@@ -2,6 +2,8 @@ package com.egg.biblioteca.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 public class Libro {
     @Id
@@ -10,7 +12,7 @@ public class Libro {
     private int ejemplares;
 
     @Temporal(TemporalType.DATE)
-    private boolean alta;
+    private LocalDate alta;
 
     @ManyToOne
     @JoinColumn(name = "autor_id")
@@ -23,7 +25,7 @@ public class Libro {
     public Libro() {
     }
 
-    public Libro(Long isbn, String titulo, int ejemplares, boolean alta, Autor autor, Editorial editorial) {
+    public Libro(Long isbn, String titulo, int ejemplares, LocalDate alta, Autor autor, Editorial editorial) {
         this.isbn = isbn;
         this.titulo = titulo;
         this.ejemplares = ejemplares;
@@ -56,11 +58,11 @@ public class Libro {
         this.ejemplares = ejemplares;
     }
 
-    public boolean isAlta() {
+    public LocalDate isAlta() {
         return alta;
     }
 
-    public void setAlta(boolean alta) {
+    public void setAlta(LocalDate alta) {
         this.alta = alta;
     }
 
