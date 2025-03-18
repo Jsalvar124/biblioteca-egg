@@ -64,7 +64,7 @@ public class EditorialService {
 
     public Editorial buscarPorId(String id) throws MyException {
         if(id == null){
-            throw new MyException("Editorial no puede ser nulo");
+            throw new MyException("id no puede ser nulo");
         }
         Integer editorialId = Integer.valueOf(id);
         Optional<Editorial> editorialResult = editorialRepository.findById(editorialId);

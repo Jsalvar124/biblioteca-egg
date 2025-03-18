@@ -85,41 +85,64 @@ public class LibroService {
         return libros;
     }
 
+    public Libro buscarPorId(Long isbn) throws MyException {
+        if(isbn == null){
+            throw new MyException("isbn no puede ser nulo");
+        }
+        ;
+        Optional<Libro> libroResult = libroRepository.findById(isbn);
+        if(libroResult.isPresent()){
+            return libroResult.get();
+        }
+        throw new MyException("El Libro no se encontró");
+
+    }
+
     @Transactional
-    public Libro modificarLibro(Long isbn, String titulo, Integer ejemplares, String idAutorString, String idEditorialString){
+    public Libro modificarLibro(Long isbn, String titulo, Integer ejemplares, String idAutorString, String idEditorialString) throws MyException {
+        validarModificar(isbn, titulo,ejemplares, idAutorString, idEditorialString);
         Optional<Libro> libroResult = libroRepository.findById(isbn);
         Libro libroModificado;
         if(libroResult.isPresent()){
             libroModificado = libroResult.get();
         }else {
-            throw new IllegalArgumentException("El Libro no se encontró.");
+            throw new MyException("El Libro no se encontró.");
         }
 
-        if(titulo != null){
+        if(titulo != null && !titulo.isEmpty()){
             libroModificado.setTitulo(titulo);
         }
         if(ejemplares != null){
             libroModificado.setEjemplares(ejemplares);
         }
-        if(idAutorString != null){
+        if(idAutorString != null && !idAutorString.isEmpty()){
+            try{
+                UUID.fromString(idAutorString);
+            }catch(IllegalArgumentException e){
+                throw new MyException("not a valid uuid "+ e.getMessage());
+            }
             UUID autorId = UUID.fromString(idAutorString);
             Optional<Autor> autorResult = autorRepository.findById(autorId);
             if(autorResult.isPresent()){
                 Autor autor = autorResult.get();
                 libroModificado.setAutor(autor);
             } else {
-                throw new IllegalArgumentException("El Autor no se encontró.");
+                throw new MyException("El Autor no se encontró.");
             }
-
         }
         if(idEditorialString != null){
+            try{
+                Integer.valueOf(idEditorialString);
+            }catch(IllegalArgumentException e){
+                throw new MyException("not a valid id "+ e.getMessage());
+            }
             Integer editorialId = Integer.valueOf(idEditorialString);
             Optional<Editorial> editorialResult = editorialRepository.findById(editorialId);
             if(editorialResult.isPresent()){
                 Editorial editorial = editorialResult.get();
                 libroModificado.setEditorial(editorial);
             } else {
-                throw new IllegalArgumentException("La Editorial no se encontró.");
+                throw new MyException("La Editorial no se encontró.");
             }
         }
 
@@ -142,6 +165,24 @@ public class LibroService {
         }
         if (editorialId == null || Integer.parseInt(editorialId) <= 0) {
             throw new MyException("El ID de la editorial debe ser mayor que cero.");
+        }
+    }
+
+    private void validarModificar(Long isbn, String titulo, Integer ejemplares, String autorId, String editorialId) throws MyException {
+        if (isbn != null && isbn <= 0) {
+            throw new MyException("El ISBN no puede ser nulo o negativo.");
+        }
+        if (titulo != null && titulo.trim().length() < 2) {
+            throw new MyException("El título debe contener al menos 2 caracteres.");
+        }
+        if (ejemplares != null && ejemplares < 0) {
+            throw new MyException("La cantidad de ejemplares no puede ser negativa.");
+        }
+        if (autorId == null || autorId.isEmpty()) {
+            throw new MyException("El ID del autor no puede estar vacío.");
+        }
+        if (editorialId == null) {
+            throw new MyException("El ID de la editorial no puee ser nulo.");
         }
     }
 }

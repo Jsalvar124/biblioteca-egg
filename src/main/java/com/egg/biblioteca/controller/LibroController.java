@@ -10,10 +10,7 @@ import com.egg.biblioteca.service.LibroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -76,5 +73,46 @@ public class LibroController {
         List<Libro> libros = libroService.listarLibros();
         modelo.addAttribute("libros", libros);
         return "libro_list.html";
+    }
+
+    @GetMapping("/modificar/{isbn}")
+    public String modificar(@PathVariable Long isbn, ModelMap modelo) {
+        try{
+            Libro libro = libroService.buscarPorId(isbn);
+            List<Autor> autores = autorService.listarAutores();
+            List<Editorial> editoriales = editorialService.listarEditoriales();
+            modelo.put("libro", libro);
+            modelo.addAttribute("autores", autores);
+            modelo.addAttribute("editoriales", editoriales);
+        }catch (MyException e){
+            modelo.put("error", e.getMessage());
+            return "libro_lista.html";
+        }
+        return "libro_modificar.html";
+    }
+
+
+    @PostMapping("/modificar/{isbn}")
+    public String modificar(@PathVariable Long isbn,@RequestParam(required = false) String titulo,
+                            @RequestParam(required = false) Integer ejemplares, @RequestParam(required = false) String idAutor,
+                            @RequestParam(required = false) String idEditorial, ModelMap modelo) {
+        try {
+            libroService.modificarLibro(isbn, titulo, ejemplares, idAutor, idEditorial);
+            return "redirect:../lista";
+        } catch (MyException ex) {
+            modelo.put("error", ex.getMessage());
+            try{ // añadir información para el formulario en caso de error.
+                Libro libro = libroService.buscarPorId(isbn);
+                List<Autor> autores = autorService.listarAutores();
+                List<Editorial> editoriales = editorialService.listarEditoriales();
+                modelo.put("libro", libro);
+                modelo.addAttribute("autores", autores);
+                modelo.addAttribute("editoriales", editoriales);
+            }catch (MyException e){
+                modelo.put("error", e.getMessage());
+                return "libro_lista.html"; // si to sale mal, volver a la lista.
+            }
+            return "libro_modificar.html";
+        }
     }
 }

@@ -46,14 +46,14 @@ public class AutorService{
 
     public Autor buscarPorId(String id) throws MyException {
         if(id == null){
-            throw new MyException("Autor no puede ser nulo");
+            throw new MyException("id no puede ser nulo");
         }
         UUID uuid = UUID.fromString(id);
         Optional<Autor> autorResult = autorRepository.findById(uuid);
         if(autorResult.isPresent()){
             return autorResult.get();
         }
-        return null;
+        throw new MyException("El Autor no se encontró");
     }
 
     @Transactional
