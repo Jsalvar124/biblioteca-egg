@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,35 +26,39 @@ public class AutorService{
     }
 
     @Transactional
-    public Autor crearAutor(String nombre){
+    public Autor crearAutor(String nombre) throws MyException {
 
         try{
             validar(nombre);
             Autor autor = new Autor(nombre);
             return autorRepository.save(autor);
-        }catch (Exception e){
-            System.err.println("Error al crear el autor: " + e.getMessage());
+        }catch (MyException e){
             e.printStackTrace();
-            return null;
+            throw new MyException("Error al crear el autor: " + e.getMessage());
         }
     }
 
     public List<Autor> listarAutores(){
-        return autorRepository.findAll();
+        List<Autor> autores = new ArrayList<>();
+        autores = autorRepository.findAll();
+        return autores;
     }
 
-    public Optional<Autor> buscarPorId(UUID id){
-        return autorRepository.findById(id);
-    }
-
-    public Autor modificarAutor(UUID id, String nombre) throws MyException {
-        Optional<Autor> autorResult = autorRepository.findById(id);
-        Autor autorModificado;
-        if(autorResult.isPresent()){
-            autorModificado = autorResult.get();
-        } else {
-            throw new IllegalArgumentException("El autor no se encontró");
+    public Autor buscarPorId(String id) throws MyException {
+        if(id == null){
+            throw new MyException("Autor no puede ser nulo");
         }
+        UUID uuid = UUID.fromString(id);
+        Optional<Autor> autorResult = autorRepository.findById(uuid);
+        if(autorResult.isPresent()){
+            return autorResult.get();
+        }
+        return null;
+    }
+
+    @Transactional
+    public void modificarAutor(String id, String nombre) throws MyException {
+        Autor autorModificado = buscarPorId(id);
         try{
             validar(nombre);
             autorModificado.setNombre(nombre);
@@ -62,7 +67,7 @@ public class AutorService{
             e.printStackTrace();
             throw e;
         }
-        return autorModificado;
+        System.out.println(autorModificado);
     }
 
     private void validar(String nombre) throws MyException {

@@ -1,88 +1,82 @@
 package com.egg.biblioteca.controller;
 
 import com.egg.biblioteca.entity.Autor;
+import com.egg.biblioteca.entity.Editorial;
 import com.egg.biblioteca.exeptions.MyException;
-import com.egg.biblioteca.service.AutorService;
+import com.egg.biblioteca.service.EditorialService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Controller
-@RequestMapping("/autor")
-public class AutorController {
+@RequestMapping("/editorial")
+public class EditorialController {
 
     @Autowired
-    private final AutorService autorService;
+    private final EditorialService editorialService;
 
-    public AutorController(AutorService autorService) {
-        this.autorService = autorService;
+    public EditorialController(EditorialService editorialService) {
+        this.editorialService = editorialService;
     }
 
-    @PostMapping("/registro") // localhost:8080/autor/registro
+    @PostMapping("/registro") // localhost:8080/editorial/registro
     public String registro(@RequestParam String nombre, ModelMap modelo) {
         try {
-            autorService.crearAutor(nombre);
-            modelo.put("exito", "El autor fue registrado con éxito!");
+            editorialService.crearEditorial(nombre);
+            modelo.put("exito", "Editorial regsitrada con éxito!");
         } catch (MyException ex) {
-            Logger.getLogger(AutorController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EditorialController.class.getName()).log(Level.SEVERE, null, ex);
             modelo.put("error", ex.getMessage());
-            return "autor_form.html";
+            return "editorial_form.html";
         }
         return "index.html";
     }
 
-
-    @GetMapping("/registrar") // localhost:8080/autor/registrar
+    @GetMapping("/registrar") // localhost:8080/editorial/registrar
     public String registrar() {
-        return "autor_form.html";
+        return "editorial_form.html";
     }
 
     @GetMapping("/lista")
     public String listar(ModelMap modelo) {
-
-
-        List<Autor> autores = autorService.listarAutores();
-        modelo.addAttribute("autores", autores);
-        return "autor_list.html";
+        List<Editorial> editoriales = editorialService.listarEditoriales();
+        modelo.addAttribute("editoriales", editoriales);
+        return "editorial_list.html";
     }
 
     @GetMapping("/modificar/{id}")
     public String modificar(@PathVariable String id, ModelMap modelo) {
         try{
-            Autor autor = autorService.buscarPorId(id);
-            modelo.put("autor", autor);
+            Editorial editorial = editorialService.buscarPorId(id);
+            modelo.put("editorial", editorial);
         }catch (MyException e){
             modelo.put("error", e.getMessage());
-            return "autor_lista.html";
+            return "editorial_lista.html";
         }
-        return "autor_modificar.html";
+        return "editorial_modificar.html";
     }
 
 
     @PostMapping("/modificar/{id}")
     public String modificar(@PathVariable String id,@RequestParam String nombre, ModelMap modelo) {
         try {
-            autorService.modificarAutor(id, nombre);
+            editorialService.modificarEditorial(id, nombre);
             return "redirect:../lista";
         } catch (MyException ex) {
             modelo.put("error", ex.getMessage());
             try{
-                Autor autor = autorService.buscarPorId(id);
-                modelo.put("autor", autor);
+                Editorial editorial = editorialService.buscarPorId(id);
+                modelo.put("editorial", editorial);
             }catch (MyException e){
                 modelo.put("error", e.getMessage());
-                return "autor_lista.html";
+                return "editorial_lista.html";
             }
-            return "autor_modificar.html";
+            return "editorial_modificar.html";
         }
     }
 }
